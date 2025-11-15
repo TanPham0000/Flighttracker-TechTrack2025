@@ -1,10 +1,28 @@
 <script>
-	import favicon from '$lib/assets/favicon.svg';
-	let { children } = $props();
+  // Geen logica hier, alleen layout.
 </script>
 
-<svelte:head>
-	<link rel="icon" href={favicon} />
-</svelte:head>
+<header>
+  <h1>FlightTracker</h1>
+</header>
 
-{@render children?.()}
+<main>
+  <slot />
+</main>
+
+<style>
+  header {
+    padding: 1rem;
+    text-align: center;
+    background: #f3f4f6;
+  }
+
+  main {
+    min-height: 80vh;
+    padding: 2rem;
+  }
+
+  h1 {
+    margin: 0;
+  }
+</style>
