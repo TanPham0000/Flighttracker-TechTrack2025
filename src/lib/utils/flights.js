@@ -1,7 +1,5 @@
 // src/lib/utils/flights.js
-
 import { writable } from "svelte/store";
-
 /**
  * flightsStore
  * Bevat de volledige lijst met vluchten die we geladen hebben.
@@ -15,5 +13,3 @@ export const flightsStore = writable(/** @type {any[]} */ ([]));
  * @type {import('svelte/store').Writable<any|null>}
  */
 export const selectedFlightStore = writable(null);
-
-

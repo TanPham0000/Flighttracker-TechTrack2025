@@ -1,16 +1,8 @@
 <script>
   export let label = "Button";
-  import { flightsStore } from "$lib/utils/flights.js";  
-
-  function handleClick() {
-    // Voorbeeld: log de huidige vluchten in de console
-    flightsStore.subscribe((flights) => {
-      console.log("Huidige vluchten:", flights);
-    })();
-  }
 </script>
 
-<button on:click={handleClick}>
+<button>
   {label}
   <slot />
 </button>

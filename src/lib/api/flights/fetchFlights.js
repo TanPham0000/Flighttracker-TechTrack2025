@@ -10,7 +10,7 @@ import { apiKey } from "$lib/config/apiKey.js";
  * @param {number} limit - maximaal aantal vluchten om op te halen
  * @returns {Promise<any[]>} - array met vluchtobjecten uit AviationStack
  */
-export async function fetchFlights(limit = 10000) {
+export async function fetchFlights(limit = 30000) {
   const url = `https://api.aviationstack.com/v1/flights?access_key=${apiKey.aviationstack}&limit=${limit}`;
 
   try {
@@ -34,7 +34,5 @@ export async function fetchFlights(limit = 10000) {
     console.error("❌ Kon vluchtdata niet ophalen:", error);
     return [];
   }
-  console.log(fetchFlights);
-
 }
 export default fetchFlights;

@@ -9,21 +9,37 @@
   export let flight;
 </script>
 
-<article class="card">
-  <h3>{flight.flight?.iata || flight.flight?.number || "Onbekende vlucht"}</h3>
-  <p>
-    <strong>Airline:</strong>
-    {flight.airline?.airline_name || "Onbekend"}
-  </p>
-  <p>
-    <strong>Route:</strong>
-    {flight.departure?.airport || "?"} → {flight.arrival?.airport || "?"}
-  </p>
-  <p>
-    <strong>Status:</strong> {flight.flight_status || "Onbekend"}
-  </p>
-</article>
+<section class="card">
+    <h3>Vlucht {flight.flight?.iata || flight.flight?.number}</h3>
+    <p>
+      <strong>Airline:</strong>
+      {flight.airline?.name || "Onbekend"}
+    </p>
 
+    <p>
+      <strong>Route:</strong>
+      {flight.departure?.airport || "?"} → {flight.arrival?.airport || "?"}
+        {flight.departure?.iata ||
+        "?"}
+      →
+      {flight.arrival?.airport ||
+        flight.arrival?.iata || "?"}
+    </p>
+
+    <p>
+      <strong>Vliegtuig:</strong>
+      {flight.aircraft?.registration ||
+        "Niet beschikbaar"}
+      {#if flight.aircraft?.iata || flight.aircraft?.icao}
+        ({flight.aircraft?.iata ||
+          flight.aircraft?.icao})
+      {/if}
+    </p>
+    <p>
+      <strong>Status:</strong>
+      {flight.flight_status || "Onbekend"}
+    </p>
+  </section>
 <style>
   .card {
     padding: 0.75rem 1rem;
