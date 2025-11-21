@@ -12,13 +12,14 @@
     padding: 0.5rem 1rem;
     border-radius: 9999px;
     border: none;
-    background: #2563eb;
+    background: --primary;
     color: white;
     font-weight: 600;
     cursor: pointer;
   }
 
   button:hover {
-    opacity: 0.9;
+      transition: background-color 0.2s;
+    background-color: #0b2661;
   }
 </style>

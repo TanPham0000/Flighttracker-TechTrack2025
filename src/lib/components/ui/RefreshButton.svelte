@@ -20,9 +20,7 @@
 
   const dispatch = createEventDispatcher();
 
-  /**
-   * Format timestamp naar leesbare string.
-   */
+  /*Format timestamp naar leesbare string*/
 
   function formatTimestamp(timestamp) {
     if (!timestamp) return "Nog nooit geladen";
@@ -30,14 +28,10 @@
     return new Date(timestamp).toLocaleString("nl-NL", {
       dateStyle: "medium",
       timeStyle: "short"
-
     });
-
   }
 
-  /**
-   * Stuurt het refresh-event naar de parent (pagina).
-   */
+  /*Stuurt het refresh-event naar de parent (pagina)*/
   function handleRefresh() {
     dispatch("refresh");
     fetchFlights();
@@ -50,14 +44,14 @@
     {formatTimestamp(lastUpdate)}
   </p>
 
-  <button label="🔄 Ververs data" on:click={handleRefresh}>🔄 Ververs data</button>
+  <button label="Ververs data" on:click={handleRefresh}>🔄 Ververs data</button>
 </section>
 
 <style>
   .refresh-box {
     padding: 0.75rem 1rem;
     border-radius: 0.75rem;
-    background: #f3f4f6;
+    background: --button-color;
     max-width: 350px;
     display: flex;
     flex-direction: column;

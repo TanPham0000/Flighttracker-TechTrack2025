@@ -1,5 +1,5 @@
 <script>
-  // Geen logica hier, alleen layout.
+  
 </script>
 
 <header>
@@ -14,7 +14,7 @@
   header {
     padding: 1rem;
     text-align: center;
-    background: #f3f4f6;
+    background: --background-color;
   }
 
   main {

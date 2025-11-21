@@ -2,10 +2,9 @@
   /**
    * FlightCard.svelte
    * ------------------
-   * Toont een compacte samenvatting van een vlucht.
+   * Toont een samenvatting van een vlucht.
    * Verwacht een "flight" prop met de structuur van AviationStack.
    */
-
   export let flight;
 </script>
 
@@ -44,7 +43,7 @@
   .card {
     padding: 0.75rem 1rem;
     border-radius: 0.75rem;
-    background: #f3f4f6;
+    background: #dfffff;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
   }
 

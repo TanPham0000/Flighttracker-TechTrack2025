@@ -1,18 +1,25 @@
-  h2 {
+:root {
+  --primary: #3498db;
+  --secondary: #cc382e;
+  --font-color: #333333;
+  --background-color: #d1d1d1;
+  --card-color: #706969;
+  --button-color: #2563eb;
+}
+
+h2 {
     margin-top: 0;
 }
 
-button {
-  padding: 0.5rem 1rem;
-  border-radius: 9999px;
-  border: none;
-  background: #2563eb;
-  color: white;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-button:hover {
-    transition: background-color 0.2s;
-  background-color: #0b2661;
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    text-decoration: none;
+    list-style: none;
+    line-break: loose;
+    font-style: normal;
+    border: none; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--font-color);
 }
