@@ -14,7 +14,7 @@
    */
 
   import { createEventDispatcher } from "svelte";
-  import fetchFlights from "$lib/api/flights/fetchFlights.js";
+  import fetchFlights from "$lib/api/flights/fetchAirportInfo.js";
 
   export let lastUpdate = null;
 

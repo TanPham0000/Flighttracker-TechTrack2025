@@ -10,7 +10,6 @@
    */
 
   import { flightsStore, selectedFlightStore } from "$lib/utils/flights.js";
-  import FlightButton from "$lib/components/ui/FlightButton.svelte";
 
 </script>
 

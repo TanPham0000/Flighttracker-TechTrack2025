@@ -1,4 +1,4 @@
 export const apiKey = {
-  aviationstack: import.meta.env.VITE_AVIATIONSTACK_KEY
+  airlabs: import.meta.env.VITE_AIRLABS_API_KEY
 };
 
