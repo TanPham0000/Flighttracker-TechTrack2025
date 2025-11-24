@@ -1,27 +1,15 @@
 <script>
   /**
-   * RefreshButton.svelte
-   * -----------------------------------------
-   * Toont:
-   *  - De datum/tijd van de laatste data refresh
-   *  - Een knop om nieuwe data op te halen
-   *
-   * Props:
-   *  - lastUpdate  (timestamp, ms)
-   *
-   * Events:
-   *  - refresh → roept een parent-functie aan om data opnieuw te laden
+   * Toont laatste update tijd en een knop om nieuwe data op te halen.
+   * Stuurt een 'refresh' event omhoog; de pagina handelt de fetch af.
    */
-
   import { createEventDispatcher } from "svelte";
-  import fetchFlights from "$lib/api/flights/fetchAirportInfo.js";
 
   export let lastUpdate = null;
 
   const dispatch = createEventDispatcher();
 
-  /*Format timestamp naar leesbare string*/
-
+  // Formatteer timestamp naar leesbare string
   function formatTimestamp(timestamp) {
     if (!timestamp) return "Nog nooit geladen";
 
@@ -31,10 +19,9 @@
     });
   }
 
-  /*Stuurt het refresh-event naar de parent (pagina)*/
+  // Stuurt het refresh-event naar de parent (pagina)
   function handleRefresh() {
     dispatch("refresh");
-    fetchFlights();
   }
 </script>
 
@@ -44,14 +31,16 @@
     {formatTimestamp(lastUpdate)}
   </p>
 
-  <button label="Ververs data" on:click={handleRefresh}>🔄 Ververs data</button>
+  <button aria-label="Ververs data" on:click={handleRefresh}>
+    Ververs data
+  </button>
 </section>
 
 <style>
   .refresh-box {
     padding: 0.75rem 1rem;
     border-radius: 0.75rem;
-    background: --button-color;
+    background: var(--button-color, #eef2ff);
     max-width: 350px;
     display: flex;
     flex-direction: column;

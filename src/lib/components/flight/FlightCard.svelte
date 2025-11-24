@@ -1,50 +1,50 @@
 <script>
   /**
    * FlightCard.svelte
-   * ------------------
-   * Toont een samenvatting van een vlucht.
-   * Verwacht een "flight" prop met de structuur van AviationStack.
+   * ----------------------------------
+   * Toont een compacte weergave van een vlucht.
    */
+
   export let flight;
 </script>
 
 <section class="card">
-    <h3>Vlucht {flight.flight?.iata || flight.flight?.number}</h3>
-    <p>
-      <strong>Airline:</strong>
-      {flight.airline?.name || "Onbekend"}
-    </p>
+  <h3>
+    Vlucht {flight.flight_iata || flight.flight_icao || "Onbekend"}
+  </h3>
 
-    <p>
-      <strong>Route:</strong>
-      {flight.departure?.airport || "?"} → {flight.arrival?.airport || "?"}
-        {flight.departure?.iata ||
-        "?"}
-      →
-      {flight.arrival?.airport ||
-        flight.arrival?.iata || "?"}
-    </p>
+  <p><strong>Airline:</strong> {flight.airline_iata || flight.airline_icao || "Onbekend"}</p>
 
-    <p>
-      <strong>Vliegtuig:</strong>
-      {flight.aircraft?.registration ||
-        "Niet beschikbaar"}
-      {#if flight.aircraft?.iata || flight.aircraft?.icao}
-        ({flight.aircraft?.iata ||
-          flight.aircraft?.icao})
-      {/if}
-    </p>
-    <p>
-      <strong>Status:</strong>
-      {flight.flight_status || "Onbekend"}
-    </p>
-  </section>
+  <p>
+    <strong>Route:</strong>
+    {(flight.dep_iata || "?")} →
+    {(flight.arr_iata || "?")}
+  </p>
+
+  <p>
+    <strong>Vliegtuig:</strong>
+    {flight.reg_number || flight.aircraft_icao || "Niet beschikbaar"}
+  </p>
+
+  <p><strong>Status:</strong> {flight.status || "Onbekend"}</p>
+
+  <p>
+    <strong>Snelheid:</strong>
+    {flight.speed ? Math.round(flight.speed) + " kts" : "—"}
+  </p>
+
+  <p>
+    <strong>Hoogte:</strong>
+    {flight.alt ? Math.round(flight.alt) + " ft" : "—"}
+  </p>
+</section>
+
 <style>
   .card {
-    padding: 0.75rem 1rem;
-    border-radius: 0.75rem;
+    padding: 1rem;
     background: #dfffff;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   }
 
   h3 {
@@ -52,7 +52,6 @@
   }
 
   p {
-    margin: 0.15rem 0;
-    font-size: 0.9rem;
+    margin: 0.3rem 0;
   }
 </style>
