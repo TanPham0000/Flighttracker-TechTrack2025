@@ -13,7 +13,7 @@ export default async function fetchActiveFlights(limit = 1000) {
 
   try {
     const res = await fetch(url);
-    if (!res.ok) throw new Error("Airlabs HTTP fout " + res.status);
+    if (!res.ok) throw new Error("Airlabs HTTP fout " + res.status); // netwerkfout
 
     const json = await res.json();
 
