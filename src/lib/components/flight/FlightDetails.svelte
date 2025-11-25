@@ -1,87 +1,213 @@
 <script>
   /**
-   * FlightDetails.svelte
-   * --------------------------------------
-   * Toont uitgebreide vluchtinformatie.
-   * Haalt airline info + aircraft info + airport info op.
+   * FlightDetails.svelte — HERWERKTE VERSIE
+   * --------------------------------------------------------
+   * Dit component toont volledige details van de geselecteerde vlucht.
+   *
+   * De vlucht is ALTIJD al genormaliseerd door normalizeFlight.js:
+   *  - flight.flight_iata / flight.flight_icao
+   *  - flight.airline_name (volledige naam via batch)
+   *  - flight.airline_logo  (via batch)
+   *  - flight.reg_number
+   *  - dep_iata / arr_iata
+   *  - status, speed, alt, heading
+   *
+   * Extra data wordt hier opgehaald:
+   *  ✔ fetchAircraftDetails   (model, fabrikant, afbeelding)
+   *  ✔ fetchAirportInfo       (volledige luchthavennamen)
+   *
+   * Dit component maakt ZO MIN MOGELIJK API calls:
+   *  - caching met Maps voorkomt dubbele requests
+   *  - geen calls als registratie / IATA ontbreekt
    */
 
   import { selectedFlightStore } from "$lib/utils/flights.js";
+
   import fetchAircraftDetails from "$lib/api/flights/fetchAircraftDetails.js";
-  import fetchAirlineInfo from "$lib/api/flights/fetchAirlineInfo.js";
   import fetchAirportInfo from "$lib/api/flights/fetchAirportInfo.js";
 
+  // Interne caches om API calls te beperken
+  const aircraftCache = new Map();
+  const airportCache = new Map();
+
+  // Huidige flight + verrijkte data
   let flight = null;
-  let airline = null;
   let aircraft = null;
   let depAirport = null;
   let arrAirport = null;
 
-  // wanneer user vlucht selecteert → fetch extras
-  $: if ($selectedFlightStore) {
-    flight = $selectedFlightStore;
-    loadDetails();
+  let loadingAircraft = false;
+  let loadingAirports = false;
+
+  // ------------------------------------------------------------
+  // Reageer op verandering in de selectedFlightStore
+  // ------------------------------------------------------------
+  $: flight = $selectedFlightStore;
+
+  // Wanneer er een nieuwe vlucht gekozen wordt, laad details
+  $: if (flight) {
+    loadDetails(flight);
+  } else {
+    aircraft = null;
+    depAirport = null;
+    arrAirport = null;
   }
 
-  async function loadDetails() {
-    if (!flight) return;
+  /**
+   * Laad alle aanvullende gegevens voor deze vlucht:
+   *  - Aircraft info via registratie
+   *  - Airport info via IATA codes
+   *
+   * Maak efficiënt gebruik van de caches.
+   */
+  async function loadDetails(flight) {
+    // ------ Vliegtuig info ophalen ------
+    if (flight.reg_number) {
+      // Cache check
+      if (aircraftCache.has(flight.reg_number)) {
+        aircraft = aircraftCache.get(flight.reg_number);
+      } else {
+        loadingAircraft = true;
+        try {
+          const result = await fetchAircraftDetails(flight.reg_number);
+          aircraft = result;
+          aircraftCache.set(flight.reg_number, result);
+        } catch (err) {
+          console.error("Fout bij aircraft details:", err);
+        } finally {
+          loadingAircraft = false;
+        }
+      }
+    } else {
+      aircraft = null;
+    }
 
-    airline = await fetchAirlineInfo(flight.airline_icao);
-    aircraft = await fetchAircraftDetails(flight.reg_number);
-    depAirport = await fetchAirportInfo(flight.dep_iata);
-    arrAirport = await fetchAirportInfo(flight.arr_iata);
+    // ------ Vertrek luchthaven ------
+    if (flight.dep_iata) {
+      if (airportCache.has(flight.dep_iata)) {
+        depAirport = airportCache.get(flight.dep_iata);
+      } else {
+        loadingAirports = true;
+        try {
+          const result = await fetchAirportInfo(flight.dep_iata);
+          depAirport = result;
+          airportCache.set(flight.dep_iata, result);
+        } catch (err) {
+          console.error("Fout bij departure airport:", err);
+        } finally {
+          loadingAirports = false;
+        }
+      }
+    } else {
+      depAirport = null;
+    }
+
+    // ------ Aankomst luchthaven ------
+    if (flight.arr_iata) {
+      if (airportCache.has(flight.arr_iata)) {
+        arrAirport = airportCache.get(flight.arr_iata);
+      } else {
+        loadingAirports = true;
+        try {
+          const result = await fetchAirportInfo(flight.arr_iata);
+          arrAirport = result;
+          airportCache.set(flight.arr_iata, result);
+        } catch (err) {
+          console.error("Fout bij arrival airport:", err);
+        } finally {
+          loadingAirports = false;
+        }
+      }
+    } else {
+      arrAirport = null;
+    }
   }
 </script>
 
 {#if !flight}
   <p>Geen vlucht geselecteerd.</p>
+
 {:else}
-  <section class="details">
-    <h2>✈️ {flight.flight_iata || flight.flight_icao}</h2>
+<section class="details">
 
-    <h3>Airline</h3>
-    <p><strong>Naam:</strong> {airline?.name || "Onbekend"}</p>
-    {#if airline?.logo}
-      <img src={airline.logo} alt="logo" class="logo"/>
+  <!-- Titel met vluchtcode -->
+  <h2>✈️ {flight.flight_iata || flight.flight_icao}</h2>
+
+  <!-- Airline info uit batch -->
+  <h3>Airline</h3>
+  <p><strong>Naam:</strong> {flight.airline_name}</p>
+
+  {#if flight.airline_logo}
+    <img src={flight.airline_logo} alt="Airline logo" class="logo" />
+  {/if}
+
+  <!-- Aircraft info -->
+  <h3>Vliegtuig</h3>
+  <p><strong>Registratie:</strong> {flight.reg_number || "Onbekend"}</p>
+
+  {#if loadingAircraft}
+    <p>✈️ Vliegtuiggegevens laden...</p>
+
+  {:else if aircraft}
+    <p><strong>Model:</strong> {aircraft.model || "Onbekend"}</p>
+    <p><strong>Fabrikant:</strong> {aircraft.manufacturer || "Onbekend"}</p>
+
+    {#if aircraft.image}
+      <img src={aircraft.image} class="plane-img" alt="Vliegtuig foto" />
     {/if}
 
-    <h3>Vliegtuig</h3>
-    <p><strong>Registratie:</strong> {flight.reg_number}</p>
-    <p><strong>Model:</strong> {aircraft?.model || "Onbekend"}</p>
-    <p><strong>Fabrikant:</strong> {aircraft?.manufacturer || "Onbekend"}</p>
-    {#if aircraft?.image}
-      <img src={aircraft.image} class="plane-img" />
-    {/if}
+  {:else}
+    <p>Geen aanvullende vliegtuiggegevens beschikbaar.</p>
+  {/if}
 
-    <h3>Route</h3>
-    <p>
-      <strong>Van:</strong> {depAirport?.name || flight.dep_iata}
-    </p>
-    <p>
-      <strong>Naar:</strong> {arrAirport?.name || flight.arr_iata}
-    </p>
+  <!-- Route -->
+  <h3>Route</h3>
+  <p><strong>Van:</strong> {depAirport?.name || flight.dep_iata || "?"}</p>
+  <p><strong>Naar:</strong> {arrAirport?.name || flight.arr_iata || "?"}</p>
 
-    <h3>Live vluchtdata</h3>
-    <p><strong>Status:</strong> {flight.status}</p>
-    <p><strong>Hoogte:</strong> {flight.alt || "—"} ft</p>
-    <p><strong>Snelheid:</strong> {flight.speed || "—"} kts</p>
-    <p><strong>Heading:</strong> {flight.dir || "—"}°</p>
-  </section>
+  <!-- Live flight data -->
+  <h3>Live vluchtdata</h3>
+  <p><strong>Status:</strong> {flight.status}</p>
+
+  <p>
+    <strong>Hoogte:</strong>
+    {Number.isFinite(flight.alt) ? `${flight.alt} ft` : "—"}
+  </p>
+  <p>
+    <strong>Snelheid:</strong>
+    {Number.isFinite(flight.speed) ? `${flight.speed} kts` : "—"}
+  </p>
+  <p>
+    <strong>Heading:</strong>
+    {Number.isFinite(flight.dir) ? `${flight.dir}°` : "—"}
+  </p>
+
+</section>
 {/if}
 
 <style>
   .details {
     padding: 1rem;
+    border-radius: 0.75rem;
     background: #eef2ff;
-    border-radius: 10px;
   }
+
+  h3 {
+    margin-bottom: 0.25rem;
+  }
+
   .logo {
     max-width: 120px;
     margin: 0.5rem 0;
   }
+
   .plane-img {
     max-width: 100%;
-    border-radius: 6px;
+    border-radius: 0.5rem;
     margin: 0.5rem 0;
+  }
+
+  p {
+    margin: 0.1rem 0;
   }
 </style>

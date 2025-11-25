@@ -29,7 +29,7 @@
     Airline:
     <select on:change={(e) => airlineFilter.set(e.target.value || null)}>
       <option value="">(alle airlines)</option>
-      {#each airlines as air}
+      {#each airlines as air} 
         <option value={air}>{air}</option>
       {/each}
     </select>

@@ -1,29 +1,35 @@
-  import { VITE_AIRLABS_API_KEY } from "$lib/config/apiKey.js";
+// -------------------------------------------------
+// fetchAirlineInfo.js
+// Batch call: haal alle airline ICAO codes in 1 request
+// -------------------------------------------------
 
-  export default async function fetchAirlineInfo(icao) {
-    if (!icao) return null;
+import { VITE_AIRLABS_API_KEY } from "$lib/config/apiKey.js";
 
-    const url = `https://airlabs.co/api/v9/airlines?api_key=${VITE_AIRLABS_API_KEY}&icao_code=${icao}`;
+export default async function fetchAirlinesBatch(icaoList) {
+  if (!icaoList || icaoList.length === 0) return {};
 
-    try {
-      const res = await fetch(url);
-      if (!res.ok) return null;
+  // Unieke ICAO codes:
+  const unique = [...new Set(icaoList.filter(Boolean))];
 
-      const json = await res.json();
+  // AirLabs supports: &icao_code=KLM&icao_code=UAE...
+  const query = "&icao_code=" + unique.join("&icao_code=");
 
-      if (!json.response || !json.response.length) return null;
+  const url = `https://airlabs.co/api/v9/airlines?api_key=${VITE_AIRLABS_API_KEY}${query}`;
 
-      const al = json.response[0];
+  const res = await fetch(url);
+  const json = await res.json();
 
-      return {
-        name: al.name,
-        fleet: al.fleet_size,
-        logo: al.logo_url,
-        callsign: al.callsign,
-        country: al.country_name,
-      };
-    } catch (err) {
-      console.error("fetchAirlineInfo error:", err);
-      return null;
-    }
-  }
+  if (!json.response) return {};
+
+  // Bouw een map zodat lookup snel is
+  const map = {};
+
+  json.response.forEach(a => {
+    map[a.icao_code] = {
+      name: a.name,
+      logo: a.logo_url
+    };
+  });
+
+  return map;
+}

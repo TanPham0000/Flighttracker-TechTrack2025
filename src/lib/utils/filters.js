@@ -1,49 +1,89 @@
+/**
+ * filters.js
+ * ----------
+ * Bevat Svelte stores voor filters en paginatie,
+ * plus een derived store voor gefilterde resultaten.
+ */
+
 import { writable, derived } from "svelte/store";
 import { flightsStore } from "./flights.js";
 
-// --------- FILTER STORES ---------
-export const airlineFilter = writable(null); // "KLM", "RYR", "DLH"
-export const routeFilter = writable({ from: null, to: null });
+/**
+ * airlineFilter
+ * --------------
+ * Bevat een airline-code (IATA of ICAO) of null voor "geen filter".
+ */
+export const airlineFilter = writable(null);
 
-// --------- PAGINATION STORE ---------
-export const pagination = writable({
-  page: 1,
-  perPage: 50, // aantal per pagina
+/**
+ * routeFilter
+ * -----------
+ * Combofilter voor vertrek (from) en bestemming (to).
+ * Beide velden zijn IATA-codes (bijv. "AMS", "KUL").
+ */
+export const routeFilter = writable({
+  from: null,
+  to: null
 });
 
-// --------- FILTERED FLIGHTS ---------
+/**
+ * pagination
+ * ----------
+ * Houdt bij op welke pagina we zitten en hoeveel vluchten we per pagina tonen.
+ */
+export const pagination = writable({
+  page: 1,
+  perPage: 50
+});
+
+/**
+ * filteredFlightsStore
+ * --------------------
+ * Derived store die flightsStore combineert met filters + paginatie.
+ * Output structuur:
+ * {
+ *   total: <totaal aantal vluchten na filters>,
+ *   page: <huidige pagina>,
+ *   perPage: <aantal per pagina>,
+ *   results: <array met vluchten voor deze pagina>
+ * }
+ */
 export const filteredFlightsStore = derived(
   [flightsStore, airlineFilter, routeFilter, pagination],
   ([$flightsStore, $airlineFilter, $routeFilter, $pagination]) => {
-    let flights = $flightsStore;
+    let list = $flightsStore;
 
-    // Filter: Airline
+    // Filter op airline-code (iata of icao)
     if ($airlineFilter) {
-      flights = flights.filter(
-        (f) =>
-          f.airline_iata === $airlineFilter ||
-          f.airline_icao === $airlineFilter
+      list = list.filter(
+        (flight) =>
+          flight.airline_iata === $airlineFilter ||
+          flight.airline_icao === $airlineFilter
       );
     }
 
-    // Filter: Route
+    // Filter op vertrek
     if ($routeFilter.from) {
-      flights = flights.filter((f) => f.dep_iata === $routeFilter.from);
+      list = list.filter((flight) => flight.dep_iata === $routeFilter.from);
     }
 
+    // Filter op bestemming
     if ($routeFilter.to) {
-      flights = flights.filter((f) => f.arr_iata === $routeFilter.to);
+      list = list.filter((flight) => flight.arr_iata === $routeFilter.to);
     }
 
-    // Pagination
-    const start = ($pagination.page - 1) * $pagination.perPage;
-    const end = start + $pagination.perPage;
+    const total = list.length;
+
+    // Bereken slice voor paginatie
+    const startIndex = ($pagination.page - 1) * $pagination.perPage;
+    const endIndex = startIndex + $pagination.perPage;
+    const results = list.slice(startIndex, endIndex);
 
     return {
-      total: flights.length,
+      total,
       page: $pagination.page,
       perPage: $pagination.perPage,
-      results: flights.slice(start, end),
+      results
     };
   }
 );

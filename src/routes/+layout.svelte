@@ -3,7 +3,7 @@
 </script>
 
 <header>
-  <h1>FlightTracker</h1>
+
 </header>
 
 <main>

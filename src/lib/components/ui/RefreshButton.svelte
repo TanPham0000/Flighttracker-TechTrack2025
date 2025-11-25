@@ -38,15 +38,23 @@
 
 <style>
   .refresh-box {
-    padding: 0.75rem 1rem;
-    border-radius: 0.75rem;
-    background: var(--button-color, #eef2ff);
-    max-width: 350px;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
   }
 
+  button {
+    margin-top: 10px;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #3b82f6;
+    background-color: #3b82f6;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background-color: #1c4fbd;
+    border-color: #2563eb;
+  } 
   p {
     margin: 0;
   }

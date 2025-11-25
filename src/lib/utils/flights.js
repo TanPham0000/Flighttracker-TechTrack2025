@@ -1,15 +1,22 @@
-// src/lib/utils/flights.js
+/**
+ * flights.js
+ * ----------
+ * Centrale Svelte stores voor vluchtdata.
+ */
+
 import { writable } from "svelte/store";
+
 /**
  * flightsStore
- * Bevat de volledige lijst met vluchten die we geladen hebben.
- * @type {import('svelte/store').Writable<any[]>}
+ * -------------
+ * Bevat de volledige lijst vluchten die we van AirLabs hebben gekregen.
  */
-export const flightsStore = writable(/** @type {any[]} */ ([]));
+export const flightsStore = writable([]);
 
 /**
  * selectedFlightStore
- * Bevat de ene vlucht die de gebruiker heeft geselecteerd.
- * @type {import('svelte/store').Writable<any|null>}
+ * --------------------
+ * Bevat precies één vlucht: de vlucht die de gebruiker geselecteerd heeft
+ * via de dropdown of via een klik op een kaart.
  */
 export const selectedFlightStore = writable(null);

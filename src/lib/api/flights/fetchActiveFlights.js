@@ -1,12 +1,14 @@
-import { VITE_AIRLABS_API_KEY } from "$lib/config/apiKey.js";
+// -------------------------------------------------
+// fetchActiveFlights.js
+// Haalt actieve vluchten op via AirLabs
+// Verrijkt met airline namen (batch), klaargemaakt
+// voor normalizer in utils.
+// -------------------------------------------------
 
-/**
- * fetchActiveFlights()
- * ---------------------
- * Haalt de lijst met actieve / recente vluchten op via AirLabs.
- * Gebruik: /flights endpoint
- */
-export default async function fetchActiveFlights(limit = 100) {
+import { VITE_AIRLABS_API_KEY } from "$lib/config/apiKey.js";
+import fetchAirlinesBatch from "./fetchAirlineInfo.js"; // <<< jouw batch versie
+
+export default async function fetchActiveFlights(limit = 1000) {
   const url = `https://airlabs.co/api/v9/flights?api_key=${VITE_AIRLABS_API_KEY}&limit=${limit}`;
 
   try {
@@ -14,35 +16,42 @@ export default async function fetchActiveFlights(limit = 100) {
     if (!res.ok) throw new Error("Airlabs HTTP fout " + res.status);
 
     const json = await res.json();
-    if (!json.response) return [];
 
-    return json.response.map((f) => ({
-      flight_icao: f.flight_icao,
-      flight_iata: f.flight_iata,
-      reg_number: f.reg_number,
+    // API-limit reached of andere fout → error bubbelt door
+    if (json.error) {
+      throw new Error(json.error.message);
+    }
 
-      airline_icao: f.airline_icao,
-      airline_iata: f.airline_iata,
+    const flights = json.response || [];
 
-      dep_iata: f.dep_iata,
-      dep_icao: f.dep_icao,
-      arr_iata: f.arr_iata,
-      arr_icao: f.arr_icao,
+    // -------------------------------------------
+    // Stap 1: alle ICAO airline codes verzamelen
+    // -------------------------------------------
+    const icaoList = flights.map((f) => f.airline_icao);
 
-      status: f.status,
+    // -------------------------------------------
+    // Stap 2: 1 batch call om ALLE airlines op te halen
+    // -------------------------------------------
+    const airlineMap = await fetchAirlinesBatch(icaoList);
 
-      lat: f.lat,
-      lng: f.lng,
-      alt: f.alt,
-      speed: f.speed,
-      dir: f.dir,
-      updated: f.updated,
+    // -------------------------------------------
+    // Stap 3: merge airline naam + logo in elke vlucht
+    // -------------------------------------------
+    const mergedFlights = flights.map((f) => {
+      const info = airlineMap[f.airline_icao] || null;
 
-      aircraft_icao: f.aircraft_icao,
-      aircraft_iata: f.aircraft_iata,
-    }));
+      return {
+        ...f,
+        airline_name: info?.name || f.airline_iata || f.airline_icao || "Onbekend",
+        airline_logo: info?.logo || null
+      };
+    });
+
+    return mergedFlights;
+
   } catch (err) {
+    // Belangrijk: error laten doorbubbelen zodat de UI “error state” toont
     console.error("fetchActiveFlights error:", err);
-    return [];
+    throw err;
   }
 }

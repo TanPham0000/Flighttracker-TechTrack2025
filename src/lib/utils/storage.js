@@ -1,33 +1,42 @@
 /**
- * Safe getter voor localStorage.
- * SvelteKit kan server-side renderen, dus we mogen nooit direct localStorage aanroepen
- * tenzij we checken of window bestaat.
- * @param {string} key - localStorage sleutel
- * @param {any} fallback - standaardwaarde als key niet bestaat
+ * storage.js
+ * ----------
+ * Kleine hulpfuncties om veilig met localStorage te werken.
+ * Belangrijk: SvelteKit kan ook server-side renderen, dus we
+ * moeten altijd checken of `window` bestaat.
+ */
+
+/**
+ * Lees een waarde uit localStorage en parse deze als JSON.
+ *
+ * @param {string} key - De sleutel waaronder de data is opgeslagen.
+ * @param {any} fallback - Waarde die teruggegeven wordt als er niets gevonden is of er een fout optreedt.
  * @returns {any}
  */
 export function getStored(key, fallback = null) {
   if (typeof window === "undefined") return fallback;
 
   try {
-    const value = localStorage.getItem(key);
-    return value ? JSON.parse(value) : fallback;
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
   } catch (error) {
+    console.warn("Kon localStorage niet lezen voor key:", key, error);
     return fallback;
   }
 }
 
 /**
- * Safe setter voor localStorage.
- * @param {string} key - localStorage sleutel
- * @param {any} value - waarde om op te slaan
+ * Sla een waarde op in localStorage als JSON.
+ *
+ * @param {string} key
+ * @param {any} value
  */
 export function setStored(key, value) {
   if (typeof window === "undefined") return;
 
   try {
     localStorage.setItem(key, JSON.stringify(value));
-  } catch (err) {
-    console.error("Kon niet opslaan in localStorage:", err);
+  } catch (error) {
+    console.error("Kon niet opslaan in localStorage voor key:", key, error);
   }
 }
