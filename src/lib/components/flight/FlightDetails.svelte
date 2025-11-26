@@ -1,6 +1,6 @@
 <script>
   /**
-   * FlightDetails.svelte — HERWERKTE VERSIE
+   * FlightDetails.svelte
    * --------------------------------------------------------
    * Dit component toont volledige details van de geselecteerde vlucht.
    *
@@ -13,8 +13,8 @@
    *  - status, speed, alt, heading
    *
    * Extra data wordt hier opgehaald:
-   *  ✔ fetchAircraftDetails   (model, fabrikant, afbeelding)
-   *  ✔ fetchAirportInfo       (volledige luchthavennamen)
+   *  fetchAircraftDetails   (model, fabrikant, afbeelding)
+   *  fetchAirportInfo       (volledige luchthavennamen)
    *
    * Dit component maakt ZO MIN MOGELIJK API calls:
    *  - caching met Maps voorkomt dubbele requests
@@ -162,6 +162,7 @@
   </p>
 
 </section>
+
 
 <style>
   .details {

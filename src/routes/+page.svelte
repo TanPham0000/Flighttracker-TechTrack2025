@@ -6,7 +6,6 @@
   import { getStored, setStored } from "$lib/utils/storage.js";
   import { flightsStore } from "$lib/utils/flights.js";
 
-  import FlightSelector from "$lib/components/flight/FlightSelector.svelte";
   import FlightDetails from "$lib/components/flight/FlightDetails.svelte";
   import FlightList from "$lib/components/flight/FlightList.svelte";
   import FlightStats from "$lib/components/flight/FlightStats.svelte";
@@ -61,22 +60,13 @@
   }
 </script>
 
-<D3Map />
-
 <div class="layout-wrapper">
 
   <!-- LEFT SIDEBAR -->
   <aside class="left-panel">
-
-   
-    <div class="panel-block">
-      <FlightSelector />
-    </div>
-
     <div class="panel-block">
       <FlightDetails />
     </div>
-
     <div class="panel-block">
       <RefreshButton {lastUpdate} on:refresh={refreshData}/>
     </div>
@@ -95,13 +85,12 @@
   /* Entire page overlay */
   .layout-wrapper {
     position: relative;
-    display: grid;
-    grid-template-columns: 380px 1fr;
+    display: flex;
+    justify-content: space-between;
     width: 100%;
     height: 100vh;
     padding: 1rem;
-    box-sizing: border-box;
-    z-index: 5; /* OVER globe */
+    z-index: 10; /* Boven globe */
   }
 
   /* LEFT COLUMN */
@@ -125,5 +114,10 @@
   .right-panel {
     overflow-y: auto;
     padding-right: 1rem;
+    display: flex;
+    align-items: flex-end ;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: fit-content;
   }
 </style>

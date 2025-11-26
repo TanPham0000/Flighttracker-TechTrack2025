@@ -228,19 +228,11 @@
 </script>
 
 
-<div class="globe-interactive"></div>
-<div class="globe-background" bind:this={container}></div>
-
 <style>
-   .globe-background {
+   .globe-container {
     position: fixed;
     inset: 0;
     z-index: 1;        /* globe achter de UI */
-    opacity: 0.30;     /* subtiele achtergrond */
-    pointer-events: none; /* UI blijft klikbaar */
-  }
-
-  .globe-interactive {
     pointer-events: auto; /* Globe is dragbaar */
   }
   .flight-point {

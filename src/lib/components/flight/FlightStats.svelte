@@ -37,6 +37,8 @@
     padding: 1rem;
     border-radius: 0.75rem;
     background: #f9fafb;
+    max-width: fit-content;
+    min-width: 220px;
   }
 
   ul {

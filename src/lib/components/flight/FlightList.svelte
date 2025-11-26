@@ -9,7 +9,6 @@
   import { filteredFlightsStore } from "$lib/utils/filters.js";
   import { selectedFlightStore } from "$lib/utils/flights.js";
   import { normalizeAirline } from "$lib/utils/airlines.js";
-  import { FlightCard } from "$lib/components/flight/FlightCard.svelte";
 </script>
 
 {#if $filteredFlightsStore.total === 0}
@@ -62,6 +61,8 @@
     background: #dfffff;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
     cursor: pointer;
+    max-width: fit-content;
+    min-width: 220px;
   }
 
   .card:hover {
