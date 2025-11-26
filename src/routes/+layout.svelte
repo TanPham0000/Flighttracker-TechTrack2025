@@ -1,25 +1,16 @@
 <script>
   
 </script>
-
-<header>
-
-</header>
-
 <main>
   <slot />
 </main>
 
 <style>
-  header {
-    padding: 1rem;
-    text-align: center;
-    background: --background-color;
-  }
-
   main {
     min-height: 80vh;
     padding: 2rem;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   h1 {

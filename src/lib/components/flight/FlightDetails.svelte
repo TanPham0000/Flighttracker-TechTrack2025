@@ -129,7 +129,14 @@
 
 {:else}
 <section class="details">
-
+{#if $selectedFlightStore}
+  <h2>✈️ {$selectedFlightStore.flight_iata || $selectedFlightStore.flight_icao}</h2>
+  <p>Registratie: {$selectedFlightStore.reg_number}</p>
+  <p>Airline: {$selectedFlightStore.airline_name}</p>
+  ...
+{:else}
+  <p>Geen vlucht geselecteerd.</p>
+{/if}
   <!-- Titel met vluchtcode -->
   <h2>✈️ {flight.flight_iata || flight.flight_icao}</h2>
 
@@ -160,6 +167,7 @@
     <p>Geen aanvullende vliegtuiggegevens beschikbaar.</p>
   {/if}
 
+  
   <!-- Route -->
   <h3>Route</h3>
   <p><strong>Van:</strong> {depAirport?.name || flight.dep_iata || "?"}</p>

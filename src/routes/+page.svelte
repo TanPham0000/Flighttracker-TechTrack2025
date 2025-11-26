@@ -11,6 +11,7 @@
   import FlightList from "$lib/components/flight/FlightList.svelte";
   import FlightStats from "$lib/components/flight/FlightStats.svelte";
   import RefreshButton from "$lib/components/ui/RefreshButton.svelte";
+  import D3Map from "$lib/components/map/D3Map.svelte";
 
   let loading = true;
   let error = null;
@@ -70,7 +71,9 @@
 {:else}
   
   <RefreshButton {lastUpdate} on:refresh={() => loadFreshData()} />
-
+    <div>
+      <D3Map />
+    </div>
   <section class="grid">
     <div class="col">
       <FlightSelector />

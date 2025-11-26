@@ -8,8 +8,8 @@
 import { VITE_AIRLABS_API_KEY } from "$lib/config/apiKey.js";
 import fetchAirlinesBatch from "./fetchAirlineInfo.js"; // <<< jouw batch versie
 
-export default async function fetchActiveFlights(limit = 1000) {
-  const url = `https://airlabs.co/api/v9/flights?api_key=${VITE_AIRLABS_API_KEY}&limit=${limit}`;
+export default async function fetchActiveFlights(limit = 10) {
+  const url = `https://airlabs.co/api/v9/flights?api_key=${VITE_AIRLABS_API_KEY}&limit=${limit}`; //
 
   try {
     const res = await fetch(url);
