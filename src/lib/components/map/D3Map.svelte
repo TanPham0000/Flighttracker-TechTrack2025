@@ -226,15 +226,18 @@
     );
   }
 </script>
-
+<div bind:this={container} class="globe-container"></div>
 
 <style>
    .globe-container {
     position: fixed;
+    min-width: 100%;
     inset: 0;
-    z-index: 1;        /* globe achter de UI */
+    z-index: 5;        /* globe achter de UI */
     pointer-events: auto; /* Globe is dragbaar */
+    background: radial-gradient(circle at center, rgb(224, 225, 226), #dcd9fd, #151616);
   }
+
   .flight-point {
     fill: #3833CC;
     stroke: white;

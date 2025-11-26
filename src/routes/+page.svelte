@@ -60,6 +60,7 @@
   }
 </script>
 
+<D3Map />
 <div class="layout-wrapper">
 
   <!-- LEFT SIDEBAR -->
@@ -83,6 +84,7 @@
 
 <style>
   /* Entire page overlay */
+  
   .layout-wrapper {
     position: relative;
     display: flex;
@@ -90,12 +92,14 @@
     width: 100%;
     height: 100vh;
     padding: 1rem;
-    z-index: 10; /* Boven globe */
+    z-index: 20; /* Boven globe */
+    pointer-events: none; /* Klikken gaat naar globe, behalve op panelen */
   }
 
   /* LEFT COLUMN */
   .left-panel {
     display: flex;
+    pointer-events: auto;
     flex-direction: column;
     gap: 1rem;
     height: 100%;
@@ -107,11 +111,13 @@
     backdrop-filter: blur(12px);
     border-radius: 12px;
     padding: 1rem;
+    pointer-events: auto;
     box-shadow: 0 2px 6px rgba(0,0,0,0.4);
   }
 
   /* RIGHT COLUMN */
   .right-panel {
+    pointer-events: auto;
     overflow-y: auto;
     padding-right: 1rem;
     display: flex;

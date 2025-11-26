@@ -1,36 +1,14 @@
 <script>
-  /**
-   * FlightDetails.svelte
-   * --------------------------------------------------------
-   * Dit component toont volledige details van de geselecteerde vlucht.
-   *
-   * De vlucht is ALTIJD al genormaliseerd door normalizeFlight.js:
-   *  - flight.flight_iata / flight.flight_icao
-   *  - flight.airline_name (volledige naam via batch)
-   *  - flight.airline_logo  (via batch)
-   *  - flight.reg_number
-   *  - dep_iata / arr_iata
-   *  - status, speed, alt, heading
-   *
-   * Extra data wordt hier opgehaald:
-   *  fetchAircraftDetails   (model, fabrikant, afbeelding)
-   *  fetchAirportInfo       (volledige luchthavennamen)
-   *
-   * Dit component maakt ZO MIN MOGELIJK API calls:
-   *  - caching met Maps voorkomt dubbele requests
-   *  - geen calls als registratie / IATA ontbreekt
-   */
-
   import { selectedFlightStore } from "$lib/utils/flights.js";
 
   import fetchAircraftDetails from "$lib/api/flights/fetchAircraftDetails.js";
   import fetchAirportInfo from "$lib/api/flights/fetchAirportInfo.js";
 
-  // Interne caches om API calls te beperken
+  // Caches
   const aircraftCache = new Map();
   const airportCache = new Map();
 
-  // Huidige flight + verrijkte data
+  // Reactieve state
   let flight = null;
   let aircraft = null;
   let depAirport = null;
@@ -44,26 +22,24 @@
   // ------------------------------------------------------------
   $: flight = $selectedFlightStore;
 
-  // Wanneer er een nieuwe vlucht gekozen wordt, laad details
+  // Wanneer flight verandert → laad details
   $: if (flight) {
     loadDetails(flight);
   } else {
+    // Reset als er geen vlucht is geselecteerd
     aircraft = null;
     depAirport = null;
     arrAirport = null;
   }
 
-  /**
-   * Laad alle aanvullende gegevens voor deze vlucht:
-   *  - Aircraft info via registratie
-   *  - Airport info via IATA codes
-   *
-   * Maak efficiënt gebruik van de caches.
-   */
+  // ------------------------------------------------------------
+  // Details ophalen
+  // ------------------------------------------------------------
   async function loadDetails(flight) {
-    // ------ Vliegtuig info ophalen ------
+    if (!flight) return; // veiligheidscheck
+
+    // ----- Aircraft -----
     if (flight.reg_number) {
-      // Cache check
       if (aircraftCache.has(flight.reg_number)) {
         aircraft = aircraftCache.get(flight.reg_number);
       } else {
@@ -74,6 +50,7 @@
           aircraftCache.set(flight.reg_number, result);
         } catch (err) {
           console.error("Fout bij aircraft details:", err);
+          aircraft = null;
         } finally {
           loadingAircraft = false;
         }
@@ -82,7 +59,7 @@
       aircraft = null;
     }
 
-    // ------ Vertrek luchthaven ------
+    // ----- Departure Airport -----
     if (flight.dep_iata) {
       if (airportCache.has(flight.dep_iata)) {
         depAirport = airportCache.get(flight.dep_iata);
@@ -94,6 +71,7 @@
           airportCache.set(flight.dep_iata, result);
         } catch (err) {
           console.error("Fout bij departure airport:", err);
+          depAirport = null;
         } finally {
           loadingAirports = false;
         }
@@ -102,7 +80,7 @@
       depAirport = null;
     }
 
-    // ------ Aankomst luchthaven ------
+    // ----- Arrival Airport -----
     if (flight.arr_iata) {
       if (airportCache.has(flight.arr_iata)) {
         arrAirport = airportCache.get(flight.arr_iata);
@@ -114,6 +92,7 @@
           airportCache.set(flight.arr_iata, result);
         } catch (err) {
           console.error("Fout bij arrival airport:", err);
+          arrAirport = null;
         } finally {
           loadingAirports = false;
         }
@@ -123,46 +102,68 @@
     }
   }
 </script>
-<section class="details">
-  <!-- Titel met vluchtcode -->
-  <h2>✈️ {flight.flight_iata || flight.flight_icao}</h2>
 
-  <!-- Airline info uit batch -->
+{#if !flight}
+  <section class="details">
+    <h2>✈️ Geen vlucht geselecteerd</h2>
+    <p>Klik op een vlucht in de lijst of op de globe om details te zien.</p>
+  </section>
+
+{:else}
+
+<section class="details">
+  <!-- Titel -->
+  <h2>✈️ {flight.flight_iata || flight.flight_icao || "Vlucht"}</h2>
+
+  <!-- Airline -->
   <h3>Airline</h3>
-  <p><strong>Naam:</strong> {flight.airline_name}</p>
+  <p><strong>Naam:</strong> {flight.airline_name || "Onbekend"}</p>
 
   {#if flight.airline_logo}
     <img src={flight.airline_logo} alt="Airline logo" class="logo" />
   {/if}
 
-  <!-- Aircraft info -->
+  <!-- Aircraft -->
   <h3>Vliegtuig</h3>
   <p><strong>Registratie:</strong> {flight.reg_number || "Onbekend"}</p>
+
+  {#if loadingAircraft}
+    <p>Bezig met laden...</p>
+  {:else if aircraft}
+    <p><strong>Type:</strong> {aircraft.model || "Onbekend"}</p>
+    <p><strong>Fabrikant:</strong> {aircraft.manufacturer || "Onbekend"}</p>
+    {#if aircraft.image}
+      <img src={aircraft.image} alt="Aircraft" class="plane-img" />
+    {/if}
+  {/if}
 
   <!-- Route -->
   <h3>Route</h3>
   <p><strong>Van:</strong> {depAirport?.name || flight.dep_iata || "?"}</p>
   <p><strong>Naar:</strong> {arrAirport?.name || flight.arr_iata || "?"}</p>
 
-  <!-- Live flight data -->
+  <!-- Live Flight Data -->
   <h3>Live vluchtdata</h3>
-  <p><strong>Status:</strong> {flight.status}</p>
+
+  <p><strong>Status:</strong> {flight.status || "Onbekend"}</p>
 
   <p>
     <strong>Hoogte:</strong>
     {Number.isFinite(flight.alt) ? `${flight.alt} ft` : "—"}
   </p>
+
   <p>
     <strong>Snelheid:</strong>
     {Number.isFinite(flight.speed) ? `${flight.speed} kts` : "—"}
   </p>
+
   <p>
     <strong>Heading:</strong>
     {Number.isFinite(flight.dir) ? `${flight.dir}°` : "—"}
   </p>
-
 </section>
 
+{/if}
 
 <style>
   .details {
