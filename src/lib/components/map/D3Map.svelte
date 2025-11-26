@@ -227,17 +227,23 @@
   }
 </script>
 
-<div class="globe-wrapper" bind:this={container}></div>
+
+<div class="globe-interactive"></div>
+<div class="globe-background" bind:this={container}></div>
 
 <style>
-  .globe-wrapper {
-    width: 100%;
-    max-width: 100%;
-    margin: 0 auto;
-    overflow: hidden;
+   .globe-background {
+    position: fixed;
+    inset: 0;
+    z-index: 1;        /* globe achter de UI */
+    opacity: 0.30;     /* subtiele achtergrond */
+    pointer-events: none; /* UI blijft klikbaar */
   }
 
-.flight-point {
+  .globe-interactive {
+    pointer-events: auto; /* Globe is dragbaar */
+  }
+  .flight-point {
     fill: #3833CC;
     stroke: white;
     stroke-width: 0.5;
@@ -245,13 +251,13 @@
     cursor: pointer;
   }
 
-.flight-point.hovered {
-  filter: drop-shadow(0 0 4px yellow);
-}
+  .flight-point.hovered {
+    filter: drop-shadow(0 0 4px yellow);
+  }
 
-.flight-point.selected {
-  fill: #00ccff;
-  stroke-width: 1.5;
-  filter: drop-shadow(0 0 6px #00eaff);
-}
+  .flight-point.selected {
+    fill: #00ccff;
+    stroke-width: 1.5;
+    filter: drop-shadow(0 0 6px #00eaff);
+  }
 </style>

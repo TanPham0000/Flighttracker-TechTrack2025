@@ -9,6 +9,7 @@
   import { filteredFlightsStore } from "$lib/utils/filters.js";
   import { selectedFlightStore } from "$lib/utils/flights.js";
   import { normalizeAirline } from "$lib/utils/airlines.js";
+  import { FlightCard } from "$lib/components/flight/FlightCard.svelte";
 </script>
 
 {#if $filteredFlightsStore.total === 0}
@@ -17,9 +18,7 @@
   <section class="list">
     {#each $filteredFlightsStore.results as flight}
       <article
-        class="card"
-        on:click={() => selectedFlightStore.set(flight)}
-      >
+        class="card" >
         <h3>Vlucht {flight.flight_iata || flight.flight_icao}</h3>
 
         <p><strong>Airline:</strong> {normalizeAirline(flight)}</p>

@@ -1,61 +1,39 @@
 <script>
-  /**
-   * FlightCard.svelte
-   * ----------------------------------------------
-   * Dit component toont:
-   *  - airline naam
-   *  - vluchtcode
-   *  - vertrek & aankomst IATA code
-   *  - registratie (indien beschikbaar)
-   *  - hoogte / snelheid
-   */
+  import { selectedFlightStore } from "$lib/utils/flights.js";
 
-  export let flight;
+  // De geselecteerde vlucht wordt automatisch geüpdatet via de store.
+  $: flight = $selectedFlightStore;
 </script>
 
+{#if flight}
 <section class="card">
-  <!-- Vluchtnummer -->
-  <h3>
-    Vlucht {flight.flight_iata || flight.flight_icao || "Onbekend"}
-  </h3>
+  <h3>Vlucht {flight.flight_iata || flight.flight_icao || "Onbekend"}</h3>
 
-  <!-- Airline -->
-  <p>
-    <strong>Airline:</strong>
-    {flight.airline_name}
-  </p>
+  <p><strong>Airline:</strong> {flight.airline_name}</p>
 
-  <!-- Route -->
   <p>
     <strong>Route:</strong>
-    {(flight.dep_iata || flight.dep_icao || "?" )} →
-    {(flight.arr_iata || flight.arr_icao || "?" )}
+    {(flight.dep_iata || flight.dep_icao || "?")} →
+    {(flight.arr_iata || flight.arr_icao || "?")}
   </p>
 
-  <!-- Aircraft (registratie) -->
-  <p>
-    <strong>Vliegtuig:</strong>
-    {flight.reg_number || "Onbekend"}
-  </p>
+  <p><strong>Vliegtuig:</strong> {flight.reg_number || "Onbekend"}</p>
 
-  <!-- Snelheid -->
   <p>
     <strong>Snelheid:</strong>
     {Number.isFinite(flight.speed) ? `${Math.round(flight.speed)} kts` : "—"}
   </p>
 
-  <!-- Hoogte -->
   <p>
     <strong>Hoogte:</strong>
     {Number.isFinite(flight.alt) ? `${Math.round(flight.alt)} ft` : "—"}
   </p>
 
-  <!-- Status -->
-  <p>
-    <strong>Status:</strong>
-    {flight.status || "Onbekend"}
-  </p>
+  <p><strong>Status:</strong> {flight.status || "Onbekend"}</p>
 </section>
+{:else}
+<p>Geen vlucht geselecteerd.</p>
+{/if}
 
 <style>
   .card {

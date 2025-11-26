@@ -61,65 +61,69 @@
   }
 </script>
 
+<D3Map />
 
-{#if loading}
-  <p>⏳ Actieve vluchten ophalen...</p>
+<div class="layout-wrapper">
 
-{:else if error}
-  <p>❌ Fout bij ophalen: {error.message}</p>
+  <!-- LEFT SIDEBAR -->
+  <aside class="left-panel">
 
-{:else}
-  
-  <RefreshButton {lastUpdate} on:refresh={() => loadFreshData()} />
-    <div>
-      <D3Map />
-    </div>
-  <section class="grid">
-    <div class="col">
+   
+    <div class="panel-block">
       <FlightSelector />
+    </div>
+
+    <div class="panel-block">
       <FlightDetails />
     </div>
 
-    <div class="col">
-      <FlightStats />
-      <FlightList />
+    <div class="panel-block">
+      <RefreshButton {lastUpdate} on:refresh={refreshData}/>
     </div>
-  </section>
 
-{/if}
+  </aside>
+
+  <!-- RIGHT CONTENT -->
+  <main class="right-panel">
+    <FlightStats />
+    <FlightList />
+  </main>
+
+</div>
+
 <style>
-  .page {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem 1rem 3rem;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  }
-
-  h1 {
-    text-align: center;
-    margin-bottom: 1.5rem;
-  }
-
-  .refresh {
-    padding: 1rem;
-    border-radius: 0.75rem;
-    background: #eff6ff;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    max-width: 450px;
-    margin: 0 auto 1.5rem auto;
-  }
-
-  .grid {
+  /* Entire page overlay */
+  .layout-wrapper {
+    position: relative;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: 380px 1fr;
+    width: 100%;
+    height: 100vh;
+    padding: 1rem;
+    box-sizing: border-box;
+    z-index: 5; /* OVER globe */
   }
 
-  .col {
+  /* LEFT COLUMN */
+  .left-panel {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    height: 100%;
+  }
+
+  /* Modular glass panels */
+  .panel-block {
+    background: rgba(20, 20, 30, 0.45);
+    backdrop-filter: blur(12px);
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  }
+
+  /* RIGHT COLUMN */
+  .right-panel {
+    overflow-y: auto;
+    padding-right: 1rem;
   }
 </style>
