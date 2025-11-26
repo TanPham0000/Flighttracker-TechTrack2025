@@ -152,21 +152,6 @@
   <h3>Vliegtuig</h3>
   <p><strong>Registratie:</strong> {flight.reg_number || "Onbekend"}</p>
 
-  {#if loadingAircraft}
-    <p>✈️ Vliegtuiggegevens laden...</p>
-
-  {:else if aircraft}
-    <p><strong>Model:</strong> {aircraft.model || "Onbekend"}</p>
-    <p><strong>Fabrikant:</strong> {aircraft.manufacturer || "Onbekend"}</p>
-
-    {#if aircraft.image}
-      <img src={aircraft.image} class="plane-img" alt="Vliegtuig foto" />
-    {/if}
-
-  {:else}
-    <p>Geen aanvullende vliegtuiggegevens beschikbaar.</p>
-  {/if}
-
   
   <!-- Route -->
   <h3>Route</h3>

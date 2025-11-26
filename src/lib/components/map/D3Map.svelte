@@ -6,15 +6,15 @@
    * Bovenop de bol worden actieve vluchten (coördinaten uit AirLabs API) geplaatst als rode stippen.
    *
    * Features:
-   *  Orthographic globe (bovenste helft zichtbaar, achterkant verborgen)
+   *  Orthographic globe 
    *  Drag-to-rotate
    *  Zoom-to-scale
    *  Dynamische puntgrootte
-   *  Clipping (stip zichtbaar alleen als op voorkant globe)
+   *  Clipping 
    */
 
   import { onMount, onDestroy } from "svelte";
-  import { flightsStore } from "$lib/utils/flights.js"; // bevat actieve vluchten
+  import { flightsStore, selectedFlightStore } from "$lib/utils/flights.js"; // Alle actieve vluchten
   import * as d3 from "d3";                              // D3 voor projectie, svg en interactie
   import { feature } from "topojson-client";             // Landen uit topojson
 
@@ -22,12 +22,12 @@
   let container;
 
   // Data & D3 state
-  let flights = [];
+  let flights = []; // alle actieve vluchten
+  let selectedFlight = null;
   let svg;
   let projection;
   let path;
-  let flightsLayer;
-  let selectedFlight;
+  let flightsLayer; 
 
   let globeReady = false; 
 
@@ -89,7 +89,7 @@
       .attr("cx", width / 2)
       .attr("cy", height / 2)
       .attr("r", currentScale)
-      .attr("fill", "#2a2a2b");
+      .attr("fill", "#001D4A");
 
     // ---------------------------------------------------------
     // LANDEN binnenhalen en tekenen
@@ -103,8 +103,8 @@
       .enter()
       .append("path")
       .attr("d", path)
-      .attr("fill", "#e0ffe0")
-      .attr("stroke", "#8ad88a")
+      .attr("fill", "#1C1F33")
+      .attr("stroke", "#EBEBFF")
       .attr("stroke-width", 1);
 
     // ---------------------------------------------------------
@@ -128,7 +128,7 @@
         const newScale = 170 * event.transform.k;
 
         // Limieten zodat globe niet te klein/groot wordt
-        currentScale = Math.max(30, Math.min(newScale, 900));
+        currentScale = Math.max(150, Math.min(newScale, 2500)); // min 5, max 2500 hoger = meer ingezoomd
 
         projection.scale(currentScale);
         redrawGlobe();
@@ -159,7 +159,6 @@
      * d3.geoDistance vergelijkt twee punten op basis van grootcirkel-afstand.
      *  - Als de afstand > pie/2 (90°), ligt het punt op de achterkant.
      */
-
     const rotate = projection.rotate();
 
     // centrum van de globe (voor de huidige rotatie)
@@ -177,45 +176,54 @@
     if (!globeReady || !flightsLayer) return;
 
     // Dynamische puntgrootte zodat ze niet huge worden bij inzoomen
-    const size = Math.max(2, 3 * (170 / currentScale));
+    const size = Math.max(1.5, 3 * 0.015); // min 1.5px
 
     // Filter alleen vluchten met echte GPS coordinaten
     const flightsWithCoords = flights.filter(
       f => typeof f.lat === "number" && typeof f.lng === "number"
     );
+  // 1: bepaal max hoogte in alle flights
+  const maxAltitude = d3.max(flightsWithCoords, d => d.alt || 0) || 40000;
 
-    // Data-binding voor alle stippen
-    const points = flightsLayer
-      .selectAll("circle.flight-point")
-      .data(flightsWithCoords, d => d.flight_iata || d.flight_icao);
+  // 2: kleurenschaal: van laag → hoog
+  const colorScale = d3.scaleSequential()
+    .domain([0, maxAltitude])
+    .interpolator(d3.interpolateTurbo);
 
-    points.exit().remove(); // verwijder oude elementen
+  const points = flightsLayer
+    .selectAll("circle.flight-point")
+    .data(flightsWithCoords, d => d.flight_iata || d.flight_icao);
 
-    // ENTER nieuwe punten
-    const enter = points.enter()
-      .append("circle")
-      .attr("class", "flight-point")
-      .attr("fill", "#ff3b3b")
-      .attr("stroke", "white")
-      .attr("stroke-width", 1)
-      .on("mouseover", function () {
-        // Grote gele highlight bij hover
-        d3.select(this).attr("fill", "yellow").attr("r", 6);
-      })
-      .on("mouseout", function () {
-        d3.select(this).attr("fill", "#ff3b3b").attr("r", size);
-      })
-      .on("click", (_, d) => {
-  selectedFlightStore.set(d);  // ⬅️ Belangrijk
-});
+  points.exit().remove();
 
-    // MERGE (update bestaande + nieuwe)
-    enter.merge(points)
-      .attr("r", size)
-      .attr("cx", d => projection([d.lng, d.lat])[0])
-      .attr("cy", d => projection([d.lng, d.lat])[1])
-      .style("display", d => isPointVisible(d.lng, d.lat) ? null : "none");
-      
+  // ENTER
+  const enter = points.enter()
+    .append("circle")
+    .attr("class", "flight-point")
+    .attr("stroke", "white")
+    .attr("stroke-width", 0.5)
+    .on("mouseover", function () {
+      d3.select(this).classed("hovered", true);
+    })
+    .on("mouseout", function () {
+      d3.select(this).classed("hovered", false);
+    })
+    .on("click", (_, d) => {
+      selectedFlightStore.set(d);
+    });
+
+  // MERGE + UPDATE
+  enter.merge(points)
+    .attr("r", size)
+    .attr("cx", d => projection([d.lng, d.lat])[0])
+    .attr("cy", d => projection([d.lng, d.lat])[1])
+    .attr("fill", d => colorScale(d.alt || 0))   // <-- KLEUR OP HOOGTE
+    .style("display", d => isPointVisible(d.lng, d.lat) ? null : "none")
+    .classed("selected", d =>
+      selectedFlight &&
+      (d.flight_iata === selectedFlight.flight_iata ||
+       d.flight_icao === selectedFlight.flight_icao)
+    );
   }
 </script>
 
@@ -229,9 +237,21 @@
     overflow: hidden;
   }
 
-  .flight-point {
-    transition: all 0.2s ease;
+.flight-point {
+    fill: #3833CC;
+    stroke: white;
+    stroke-width: 0.5;
+    transition: 0.2s ease;
     cursor: pointer;
   }
 
+.flight-point.hovered {
+  filter: drop-shadow(0 0 4px yellow);
+}
+
+.flight-point.selected {
+  fill: #00ccff;
+  stroke-width: 1.5;
+  filter: drop-shadow(0 0 6px #00eaff);
+}
 </style>
