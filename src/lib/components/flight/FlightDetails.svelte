@@ -22,7 +22,7 @@
   // ------------------------------------------------------------
   $: flight = $selectedFlightStore;
 
-  // Wanneer flight verandert → laad details
+  // Wanneer flight verandert laad details
   $: if (flight) {
     loadDetails(flight);
   } else {

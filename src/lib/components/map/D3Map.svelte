@@ -235,7 +235,10 @@
     inset: 0;
     z-index: 5;        /* globe achter de UI */
     pointer-events: auto; /* Globe is dragbaar */
-    background: radial-gradient(circle at center, rgb(224, 225, 226), #dcd9fd, #151616);
+    scroll-behavior: smooth;
+    scroll-snap-type: y mandatory;
+    overflow: hidden;
+    background-color: #2e2e2e;
   }
 
   .flight-point {

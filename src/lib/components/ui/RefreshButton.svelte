@@ -37,8 +37,6 @@
 </section>
 
 <style>
-  .refresh-box {
-  }
 
   button {
     margin-top: 10px;
