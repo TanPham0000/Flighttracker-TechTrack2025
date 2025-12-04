@@ -109,7 +109,7 @@
   h3 {
     margin: 0 0 0.75rem 0;
     font-size: 1.1rem;
-    color: var(--color-text-primary);
+    color: #f1f5f9;
     font-weight: 600;
     display: flex;
     align-items: center;
@@ -152,6 +152,7 @@
 
   p {
     margin: 0;
+    color: #f1f5f9;
   }
 
   /* Empty state */

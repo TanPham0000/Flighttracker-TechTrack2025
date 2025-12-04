@@ -1,4 +1,20 @@
 <script>
+  /**
+   * FlightDetails.svelte
+   * --------------------
+   * Toont alle detailinformatie van de momenteel geselecteerde vlucht.
+   *
+   * Belangrijk:
+   *  - Luistert naar `selectedFlightStore` (één actieve vlucht).
+   *  - Haalt aanvullende informatie op bij externe APIs:
+   *      * Airline details (naam, land, callsign, logo)
+   *      * Aircraft details (model, fabrikant, leeftijd, motoren, image)
+   *      * Vertrek- en aankomstluchthavens (stad, land, volledige naam)
+   *      * Optioneel: vliegtuigfoto's via Planespotters
+   *  - Gebruikt eenvoudige in‑memory caches (Maps) zodat we bij
+   *    meerdere clicks op dezelfde vlucht niet onnodig opnieuw fetchen.
+   */
+
   import { selectedFlightStore } from "$lib/utils/flights.js";
 
   import fetchAircraftDetails from "$lib/api/flights/fetchAircraftDetails.js";
@@ -6,7 +22,7 @@
   import fetchAirlineDetails from "$lib/api/flights/fetchAirlineDetails.js";
   import fetchPlaneImages from "$lib/api/aircraft/fetchPlaneImages.js";
 
-  // Caches
+  // Caches voor reeds opgehaalde data (alleen voor deze sessie in memory)
   const aircraftCache = new Map();
   const airportCache = new Map();
   const airlineCache = new Map();
@@ -49,10 +65,13 @@
     planePhotos = [];
   }
 
-  // ------------------------------------------------------------
-  // Details ophalen
-  // ------------------------------------------------------------
   /**
+   * Haalt (asynchroon) alle aanvullende details voor een vlucht op.
+   * - airlineDetails: via AirLabs /airlines endpoint
+   * - aircraft: via AirLabs aircraft endpoint
+   * - dep/arr airports: via AviationAPI
+   * - planePhotos: via Planespotters
+   *
    * @param {any} flight
    */
   async function loadDetails(flight) {
