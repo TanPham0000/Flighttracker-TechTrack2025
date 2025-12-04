@@ -15,7 +15,7 @@
   /** @type {string | null} */
   let lastUpdate = null;
   let loading = false;
-  /** @type {string | null} */
+  /** @type {string | null} */ 
   let error = null;
 
   // -------------------------------------------------------------
@@ -137,7 +137,7 @@
   }
 
   .panel-block:hover {
-    transform: translateY(-2px);
+    
     box-shadow: 
       0 12px 40px rgba(0, 0, 0, 0.4),
       0 0 0 1px rgba(255, 255, 255, 0.15);
