@@ -12,53 +12,45 @@
   // -------------------------------------------------------------
   // INITIAL LOAD bij elke page refresh een verse API call
   
-  /** @type {string | null} */
   let lastUpdate = null;
   let loading = false;
-  /** @type {string | null} */
   let error = null;
+  let aircraft = []; // Store the flights here
 
-  // -------------------------------------------------------------
-  // Fetch and map flight data
-  // -------------------------------------------------------------
   async function loadFreshData() {
     loading = true;
     error = null;
-
+    
     try {
-      // Use the API route which handles the AirLabs API call server-side
-      const res = await fetch("/api");
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || `HTTP ${res.status}`);
-      }
-
-      const json = await res.json();
-
-      // Map incoming data through normalizer and store
-      if (json?.response && Array.isArray(json.response)) {
-        const normalizedFlights = json.response
-          .map(normalizeFlight)
-          .filter((/** @type {any} */ flight) => flight !== null);
+        // Calling your internal proxy
+        const response = await fetch('/api/flights');
         
-        flightsStore.set(normalizedFlights);
-        lastUpdate = new Date().toISOString();
-      } else {
-        throw new Error("Invalid response format from API");
-      }
-    } catch (err) {
-      console.error("AirLabs fetch error:", err);
-      error = err instanceof Error ? err.message : String(err);
-    } finally {
-      loading = false;
-    }
-  }
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Proxy Error ${response.status}: ${errorText}`);
+        }
 
-  // Auto-load once on mount
+        const result = await response.json();
+        
+        // ADSB.lol nesting is usually result.ac
+        aircraft = result.ac || [];
+        lastUpdate = new Date().toLocaleTimeString();
+
+        console.log("✈️ Data received in Page:", aircraft.length, "planes");
+        
+    } catch (err) {
+        error = err.message;
+        console.error("❌ Component Fetch Error:", error);
+    } finally {
+        loading = false;
+    }
+}
+
   onMount(() => {
     loadFreshData();
+    const interval = setInterval(loadFreshData, 10000); // Auto-refresh
+    return () => clearInterval(interval);
   });
-
 </script>
 
 <D3Map />

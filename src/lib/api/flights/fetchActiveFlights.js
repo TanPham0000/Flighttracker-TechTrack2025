@@ -5,7 +5,7 @@
 // voor normalizer in utils.
 // -------------------------------------------------
 
-import { VITE_AIRLABS_API_KEY } from "$lib/config/apiKey.js";
+
 import { getJson } from "$lib/api/httpClient.js";
 
 /**

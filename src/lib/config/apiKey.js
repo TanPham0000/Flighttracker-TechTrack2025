@@ -6,4 +6,3 @@ export const VITE_AIRLABS_API_KEY = import.meta.env.VITE_AIRLABS_API_KEY;
 export const apiKey = {
   airlabs: VITE_AIRLABS_API_KEY
 };
-
