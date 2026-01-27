@@ -2,11 +2,11 @@
   import { onMount } from "svelte";
   import { flightsStore } from "$lib/utils/flights.js";
   import { fetchActiveFlightsForUi } from "$lib/api/flights/fetchActiveFlights.js";
-
   import FlightDetails from "$lib/components/flight/FlightDetails.svelte";
   import FlightList from "$lib/components/flight/FlightList.svelte";
   import FlightStats from "$lib/components/flight/FlightStats.svelte";
   import RefreshButton from "$lib/components/ui/RefreshButton.svelte";
+
   import D3Map from "$lib/components/map/D3Map.svelte";
 
   // -------------------------------------------------------------
@@ -15,15 +15,28 @@
   let lastUpdate = null;
   let loading = false;
   let error = null;
+  const radiusNm = 250;
+  let selectedCenter = null;
+
+  function handleGlobeSelect(event) {
+    const { lat, lon } = event.detail || {};
+    if (typeof lat !== "number" || typeof lon !== "number") return;
+    selectedCenter = { lat, lon };
+    loadFreshData();
+  }
 
   async function loadFreshData() {
     loading = true;
     error = null;
     try {
+        if (!selectedCenter) {
+          flightsStore.set([]);
+          return;
+        }
+        const query = `?lat=${encodeURIComponent(selectedCenter.lat)}&lon=${encodeURIComponent(selectedCenter.lon)}&radius=${radiusNm}`;
         // Haal data via interne proxy met een compacte helper
-        const result = await fetchActiveFlightsForUi({ url: "/api/flights" }); // Gebruik interne API route als proxy
+        const result = await fetchActiveFlightsForUi({ url: `/api/flights${query}` });
         const normalizedFlights = result.flights || [];
-        console.log("✅ Component Fetch Success:", normalizedFlights.length, "flights loaded.");
         
         // Update de store zodat alle componenten dezelfde data hebben
         flightsStore.set(normalizedFlights);
@@ -40,13 +53,11 @@
   }
 
   onMount(() => {
-    loadFreshData();
-    const interval = setInterval(loadFreshData, 10000); // Auto-refresh
-    return () => clearInterval(interval);
+    flightsStore.set([]);
   });
 </script>
 
-<D3Map />
+<D3Map on:select={handleGlobeSelect} />
 
 <div class="layout-wrapper">
   <!-- Loading Overlay -->

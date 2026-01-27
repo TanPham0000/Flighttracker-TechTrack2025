@@ -13,13 +13,15 @@
    *  Clipping 
    */
 
-  import { onMount, onDestroy } from "svelte";
+  import { onMount, onDestroy, createEventDispatcher } from "svelte";
   import { flightsStore, selectedFlightStore } from "$lib/utils/flights.js"; // Alle actieve vluchten
   import * as d3 from "d3";                              // D3 voor projectie, svg en interactie
   import { feature } from "topojson-client";             // Landen uit topojson
 
   // Houdt referentie naar het DOM-element
   let container;
+
+  const dispatch = createEventDispatcher();
 
   // Data & D3 state
   let flights = []; // alle actieve vluchten
@@ -135,6 +137,18 @@
       })
     );
 
+    // ---------------------------------------------------------
+    // Click: bepaal coordinaten voor radius-filter
+    // ---------------------------------------------------------
+    svg.on("click", (event) => {
+      const [x, y] = d3.pointer(event);
+      const coords = projection.invert([x, y]);
+      if (!coords) return;
+      const [lon, lat] = coords;
+      if (!isPointVisible(lon, lat)) return;
+      dispatch("select", { lat, lon });
+    });
+
     globeReady = true;
     updateFlights();
   });
@@ -208,7 +222,8 @@
     .on("mouseout", function () {
       d3.select(this).classed("hovered", false);
     })
-    .on("click", (_, d) => {
+    .on("click", (event, d) => {
+      event.stopPropagation();
       selectedFlightStore.set(d);
     });
 
