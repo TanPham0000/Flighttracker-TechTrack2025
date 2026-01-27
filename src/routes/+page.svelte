@@ -1,7 +1,7 @@
 <script>
   import { onMount } from "svelte";
-  import { normalizeFlight } from "$lib/utils/normalizer.js";
   import { flightsStore } from "$lib/utils/flights.js";
+  import { fetchActiveFlightsForUi } from "$lib/api/flights/fetchActiveFlights.js";
 
   import FlightDetails from "$lib/components/flight/FlightDetails.svelte";
   import FlightList from "$lib/components/flight/FlightList.svelte";
@@ -19,42 +19,15 @@
   async function loadFreshData() {
     loading = true;
     error = null;
-    
     try {
-        // Calling your internal proxy
-        const response = await fetch('/api/flights');
+        // Haal data via interne proxy met een compacte helper
+        const result = await fetchActiveFlightsForUi({ url: "/api/flights" }); // Gebruik interne API route als proxy
+        const normalizedFlights = result.flights || [];
+        console.log("✅ Component Fetch Success:", normalizedFlights.length, "flights loaded.");
         
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Proxy Error ${response.status}: ${errorText}`);
-        }
-
-        const result = await response.json();
-        
-        // ADSB.lol nesting is usually result.ac
-        const rawFlights = result.ac || [];
-        
-        console.log("📊 Raw API response:", {
-          total: result.total,
-          acCount: rawFlights.length,
-          msg: result.msg
-        });
-        
-        // Normalize each flight from ADSB.lol format to our expected format
-        const normalizedFlights = rawFlights
-          .map(normalizeFlight)
-          .filter(flight => flight !== null); // Remove any null entries (flights without coordinates)
-        
-        // Update the flightsStore so all components can access the data
+        // Update de store zodat alle componenten dezelfde data hebben
         flightsStore.set(normalizedFlights);
-        
         lastUpdate = new Date().toLocaleTimeString();
-
-        console.log("✈️ Data processed:", {
-          raw: rawFlights.length,
-          normalized: normalizedFlights.length,
-          filtered: rawFlights.length - normalizedFlights.length
-        });
         
     } catch (err) {
         error = err.message;
@@ -64,7 +37,7 @@
     } finally {
         loading = false;
     }
-}
+  }
 
   onMount(() => {
     loadFreshData();

@@ -31,10 +31,10 @@ export function normalizeFlight(raw) {
     flight_icao: flightNumber || raw.hex,
 
     // Airline (not available in ADSB.lol)
-    airline_name: "Unknown",
-    airline_logo: null,
-    airline_iata: null,
-    airline_icao: null,
+    airline_name: raw.airline_name || "Unknown",
+    airline_logo: raw.airline_logo || raw.logo || null,
+    airline_iata: raw.airline_iata || null,
+    airline_icao: raw.airline_icao || null,
 
     // Route (not available)
     dep_iata: null,
@@ -44,8 +44,9 @@ export function normalizeFlight(raw) {
 
     // Aircraft
     reg_number: raw.r || raw.hex,
-    aircraft_iata: raw.t,
-    aircraft_icao: raw.t,
+    aircraft_iata: raw.aircraft_iata || raw.t,
+    aircraft_icao: raw.aircraft_icao || raw.t,
+    aircraft_image: raw.aircraft_image || raw.image || null,
 
     // Live data
     status: altitude === 0 ? "ground" : "en-route",
