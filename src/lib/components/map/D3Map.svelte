@@ -3,7 +3,7 @@
    * Globe Visualization Component
    * ------------------------------
    * Deze component tekent een 3D-achtige wereldbol met een orthographic map projection.
-   * Bovenop de bol worden actieve vluchten (coördinaten uit AirLabs API) geplaatst als rode stippen.
+   * Bovenop de bol worden actieve vluchten (coördinaten uit ADSB.lol API) geplaatst als rode stippen.
    *
    * Features:
    *  Orthographic globe 

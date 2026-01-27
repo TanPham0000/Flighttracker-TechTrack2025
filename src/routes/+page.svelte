@@ -15,7 +15,6 @@
   let lastUpdate = null;
   let loading = false;
   let error = null;
-  let aircraft = []; // Store the flights here
 
   async function loadFreshData() {
     loading = true;
@@ -33,14 +32,35 @@
         const result = await response.json();
         
         // ADSB.lol nesting is usually result.ac
-        aircraft = result.ac || [];
+        const rawFlights = result.ac || [];
+        
+        console.log("📊 Raw API response:", {
+          total: result.total,
+          acCount: rawFlights.length,
+          msg: result.msg
+        });
+        
+        // Normalize each flight from ADSB.lol format to our expected format
+        const normalizedFlights = rawFlights
+          .map(normalizeFlight)
+          .filter(flight => flight !== null); // Remove any null entries (flights without coordinates)
+        
+        // Update the flightsStore so all components can access the data
+        flightsStore.set(normalizedFlights);
+        
         lastUpdate = new Date().toLocaleTimeString();
 
-        console.log("✈️ Data received in Page:", aircraft.length, "planes");
+        console.log("✈️ Data processed:", {
+          raw: rawFlights.length,
+          normalized: normalizedFlights.length,
+          filtered: rawFlights.length - normalizedFlights.length
+        });
         
     } catch (err) {
         error = err.message;
         console.error("❌ Component Fetch Error:", error);
+        // Clear flights on error
+        flightsStore.set([]);
     } finally {
         loading = false;
     }
@@ -129,7 +149,6 @@
   }
 
   .panel-block:hover {
-    transform: translateY(-2px);
     box-shadow: 
       0 12px 40px rgba(0, 0, 0, 0.4),
       0 0 0 1px rgba(255, 255, 255, 0.15);

@@ -3,10 +3,8 @@
  * -----------
  * Helpers en store om airline-namen overal consistent te tonen.
  *
- * Idee:
- *  - AirLabs /flights endpoint geeft alleen codes (airline_iata / airline_icao)
- *  - Bijv. "OD" of "IGO"
- *  - Via /airlines endpoint kunnen we de volledige naam ophalen ("Batik Air")
+ * Note: ADSB.lol API doesn't provide airline information.
+ * This utility is kept for compatibility but will show "Unknown" or codes.
  *
  * We cachen die namen in:
  *  - een Svelte store (airlineNameMap)
@@ -40,7 +38,7 @@ export const airlineNameMap = writable(initialMap);
  *  3. Anders → toon de code (IATA/ICAO) zelf
  *  4. Als zelfs dat niet kan → "Onbekend"
  *
- * @param {object} flight - Vluchtobject uit AirLabs /flights
+ * @param {object} flight - Vluchtobject uit ADSB.lol API
  * @returns {string}
  */
 export function normalizeAirline(flight) {

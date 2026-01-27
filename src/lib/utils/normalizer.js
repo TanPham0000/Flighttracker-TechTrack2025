@@ -7,11 +7,28 @@
 export function normalizeFlight(raw) {
   if (!raw) return null;
 
+  // Skip flights without coordinates (can't display on map)
+  if (typeof raw.lat !== 'number' || typeof raw.lon !== 'number' || 
+      isNaN(raw.lat) || isNaN(raw.lon)) {
+    return null;
+  }
+
+  // Handle altitude - can be number or "ground" string
+  let altitude = null;
+  if (typeof raw.alt_baro === 'number') {
+    altitude = raw.alt_baro;
+  } else if (raw.alt_baro === 'ground') {
+    altitude = 0;
+  }
+
+  // Clean flight number (remove extra spaces)
+  const flightNumber = raw.flight ? raw.flight.trim() : null;
+
   return {
     // Algemene vlucht info
     id: raw.hex,
-    flight_iata: raw.flight || raw.hex,
-    flight_icao: raw.flight || raw.hex,
+    flight_iata: flightNumber || raw.hex,
+    flight_icao: flightNumber || raw.hex,
 
     // Airline (not available in ADSB.lol)
     airline_name: "Unknown",
@@ -31,12 +48,12 @@ export function normalizeFlight(raw) {
     aircraft_icao: raw.t,
 
     // Live data
-    status: "en-route", // assume
+    status: altitude === 0 ? "ground" : "en-route",
     lat: raw.lat,
     lng: raw.lon,
-    alt: raw.alt_baro,
-    speed: raw.gs,
-    dir: raw.track,
-    updated: Date.now() / 1000 - raw.seen // approximate
+    alt: altitude,
+    speed: raw.gs || 0,
+    dir: raw.track || 0,
+    updated: raw.seen ? Date.now() / 1000 - raw.seen : Date.now() / 1000
   };
 }

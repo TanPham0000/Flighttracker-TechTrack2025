@@ -9,7 +9,7 @@ import { writable } from "svelte/store";
 /**
  * flightsStore
  * -------------
- * Bevat de volledige lijst vluchten die we van AirLabs hebben gekregen.
+ * Bevat de volledige lijst vluchten die we van ADSB.lol API hebben gekregen.
  */
 export const flightsStore = writable([]);
 
