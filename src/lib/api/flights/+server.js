@@ -1,6 +1,5 @@
 // src/routes/api/flights/+server.js
 import { json } from '@sveltejs/kit';
-import database from '$lib/server/db'; 
 import fs from 'fs';
 import path from 'path';
 
@@ -8,7 +7,7 @@ const LOG_PATH = path.resolve('data/flight_history.jsonl');
 
 export async function GET() {
     try {
-        const response = await fetch('https://api.airplanes.live/v2/all');
+        const response = await fetch('https://opensky-network.org/api/states/all');
         const data = await response.json();
         const rawPlanes = data.ac || [];
         const timestamp = Date.now();
